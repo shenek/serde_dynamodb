@@ -193,7 +193,19 @@ impl<'de, 'a, R: Read> serde::de::Deserializer<'de> for &'a mut Deserializer<R> 
     where
         V: serde::de::Visitor<'de>,
     {
-        unimplemented!()
+        visitor.visit_bytes(
+            &self
+                .read
+                .get_attribute_value(&self.current_field)
+                .ok_or_else(|| Error {
+                    message: format!("missing bytes for field {:?}", &self.current_field),
+                })?
+                .clone()
+                .b
+                .ok_or_else(|| Error {
+                    message: format!("missing bytes for field {:?}", &self.current_field),
+                })?[..],
+        )
     }
 
     fn deserialize_byte_buf<V>(self, _visitor: V) -> Result<V::Value>

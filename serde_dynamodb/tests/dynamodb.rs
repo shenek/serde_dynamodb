@@ -4,6 +4,7 @@ use rusoto_dynamodb::AttributeValue;
 use serde::de::{MapAccess, Visitor};
 use serde::ser::SerializeStruct;
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
+use serde_bytes;
 use std::collections::{HashMap, HashSet};
 use std::fmt;
 
@@ -97,7 +98,7 @@ fn can_go_back_and_forth() {
     #[derive(Deserialize, Serialize, Debug, PartialEq)]
     struct Unit;
     #[derive(Deserialize, Serialize, Debug, PartialEq)]
-    struct Basic {
+    struct Basic<'a> {
         i: i32,
         j: i32,
         f: f32,
@@ -105,6 +106,8 @@ fn can_go_back_and_forth() {
         b: u8,
         u: u32,
         c: char,
+        #[serde(with = "serde_bytes")]
+        bb: &'a [u8],
         intern: Internal,
         list: Vec<i32>,
         some: Option<Internal>,
@@ -121,6 +124,7 @@ fn can_go_back_and_forth() {
         b: 13,
         u: 312,
         c: 0 as char,
+        bb: b"1234567890",
         intern: Internal { k: 512, f: 13.54 },
         list: vec![0, 2, 5],
         some: Some(Internal { k: 120, f: 144.304 }),

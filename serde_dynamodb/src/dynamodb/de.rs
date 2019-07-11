@@ -2,10 +2,9 @@
 
 use std::collections::HashMap;
 
+use crate::error::{Error, Result};
 use rusoto_dynamodb::AttributeValue;
 use serde;
-
-use crate::error::{Error, Result};
 
 macro_rules! impl_deserialize_n {
     ($type:ty, $method:ident, $visit:ident) => {
@@ -187,11 +186,23 @@ impl<'de, 'a, R: Read> serde::de::Deserializer<'de> for &'a mut Deserializer<R> 
         self.deserialize_str(visitor)
     }
 
-    fn deserialize_bytes<V>(self, _visitor: V) -> Result<V::Value>
+    fn deserialize_bytes<V>(self, visitor: V) -> Result<V::Value>
     where
         V: serde::de::Visitor<'de>,
     {
-        unimplemented!()
+        visitor.visit_bytes(
+            &self
+                .read
+                .get_attribute_value(&self.current_field)
+                .ok_or_else(|| Error {
+                    message: format!("missing bytes for field {:?}", &self.current_field),
+                })?
+                .clone()
+                .b
+                .ok_or_else(|| Error {
+                    message: format!("missing bytes for field {:?}", &self.current_field),
+                })?[..],
+        )
     }
 
     fn deserialize_byte_buf<V>(self, _visitor: V) -> Result<V::Value>

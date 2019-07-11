@@ -107,6 +107,8 @@ fn can_go_back_and_forth() {
         b: u8,
         u: u32,
         c: char,
+        #[serde(with = "serde_bytes")]
+        bb: &'a [u8],
         intern: Internal,
         list: Vec<i32>,
         some: Option<Internal>,
@@ -123,6 +125,7 @@ fn can_go_back_and_forth() {
         b: 13,
         u: 312,
         c: 0 as char,
+        bb: b"1234567890",
         intern: Internal { k: 512, f: 13.54 },
         list: vec![0, 2, 5],
         some: Some(Internal { k: 120, f: 144.304 }),
